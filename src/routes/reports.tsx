@@ -5,7 +5,7 @@ import { AppShell } from "@/components/app-shell";
 import { DemoToast, KpiTile, Panel, StatusPill } from "@/components/argrid-ui";
 import { PdfExportButton } from "@/components/pdf-export-button";
 import { reports } from "@/lib/demo-domain";
-import { exportExecutiveReportPdf } from "@/lib/pdf-engine";
+import { exportExecutiveReportPdf, exportInvoicePdf } from "@/lib/pdf-engine";
 
 export const Route = createFileRoute("/reports")({ component: Reports });
 
@@ -118,6 +118,50 @@ function Reports() {
               </div>
             ))}
           </div>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button className="btn-secondary" onClick={() => setPreview(reports[0])}>
+              <FileBarChart className="size-3.5" /> Report PDF
+            </button>
+            <PdfExportButton
+              label="Invoice PDF"
+              onExport={(onProgress) =>
+                exportInvoicePdf(
+                  {
+                    invoiceNumber: "AGR-0726-T03",
+                    tenantName: "Tenant C · Cold Storage",
+                    tenantId: "T-003",
+                    meterId: "MTR-T03",
+                    period: "01–31 July 2026",
+                    dueDate: "15 August 2026",
+                    quality: "Estimated · approval required",
+                    energyKwh: 220_600,
+                    peakDemandKw: 540,
+                    charges: [
+                      {
+                        label: "Active energy",
+                        basis: "220,600 kWh · blended tariff",
+                        amount: 230_364_000,
+                      },
+                      {
+                        label: "Demand charge",
+                        basis: "540 kW · monthly peak",
+                        amount: 40_824_000,
+                      },
+                      {
+                        label: "Tax and service",
+                        basis: "Validated billing rules",
+                        amount: 20_412_000,
+                      },
+                    ],
+                    total: 291_600_000,
+                    calculationVersion: "CALC-0726-04",
+                  },
+                  onProgress,
+                )
+              }
+              onSuccess={() => setNotice("Auditable tenant invoice PDF generated successfully.")}
+            />
+          </div>
         </Panel>
         <Panel title="Report Delivery" className="xl:col-span-2">
           <div className="grid grid-cols-3 gap-3 text-[10.5px]">
@@ -138,7 +182,11 @@ function Reports() {
 
       {notice && <DemoToast message={notice} onClose={() => setNotice("")} />}
       {preview && (
-        <ReportPreview report={preview} onClose={() => setPreview(null)} onNotice={setNotice} />
+        <ReportPreview
+          report={preview}
+          onClose={() => setPreview(null)}
+          onNotice={setNotice}
+        />
       )}
     </AppShell>
   );
@@ -182,9 +230,21 @@ function ReportPreview({
                     period: "July 2026",
                     generatedAt: new Date(),
                     metrics: [
-                      { label: "Energy performance", value: "-4.8%", note: "vs normalized baseline" },
-                      { label: "Verified saving", value: "IDR 1.15 B", note: "annualized YTD" },
-                      { label: "Data confidence", value: "98.4%", note: "quality-weighted" },
+                      {
+                        label: "Energy performance",
+                        value: "-4.8%",
+                        note: "vs normalized baseline",
+                      },
+                      {
+                        label: "Verified saving",
+                        value: "IDR 1.15 B",
+                        note: "annualized YTD",
+                      },
+                      {
+                        label: "Data confidence",
+                        value: "98.4%",
+                        note: "quality-weighted",
+                      },
                     ],
                     findings: [
                       "Energy performance remains ahead of the normalized monthly target, supported by verified utility optimization and improved demand control.",
@@ -193,11 +253,20 @@ function ReportPreview({
                     ],
                     monthlyTrend: reportTrend,
                     evidence: [
-                      { label: "Calculation version", value: "CALC-ENERGY-2026.07.4" },
+                      {
+                        label: "Calculation version",
+                        value: "CALC-ENERGY-2026.07.4",
+                      },
                       { label: "Baseline version", value: "ENB-2025-NORM-v3" },
                       { label: "Source completeness", value: "99.6%" },
-                      { label: "Quality state", value: "Measured with two reviewed intervals" },
-                      { label: "Document classification", value: "Public demonstration / simulated data" },
+                      {
+                        label: "Quality state",
+                        value: "Measured with two reviewed intervals",
+                      },
+                      {
+                        label: "Document classification",
+                        value: "Public demonstration / simulated data",
+                      },
                     ],
                   },
                   onProgress,
@@ -205,7 +274,11 @@ function ReportPreview({
               }
               onSuccess={() => onNotice(`${report.name} PDF generated successfully.`)}
             />
-            <button className="size-8 grid place-items-center rounded-md hover:bg-surface-2" onClick={onClose} aria-label="Close preview">
+            <button
+              className="size-8 grid place-items-center rounded-md hover:bg-surface-2"
+              onClick={onClose}
+              aria-label="Close preview"
+            >
               <X className="size-4" />
             </button>
           </div>
@@ -214,14 +287,24 @@ function ReportPreview({
           <div className="mx-auto max-w-[760px] bg-white text-slate-900 min-h-[900px] shadow-xl p-8 sm:p-12">
             <div className="flex items-start justify-between border-b border-slate-200 pb-6">
               <div>
-                <div className="text-xs uppercase tracking-[.18em] text-cyan-700">ArGrid Intelligence Report</div>
+                <div className="text-xs uppercase tracking-[.18em] text-cyan-700">
+                  ArGrid Intelligence Report
+                </div>
                 <h2 className="mt-2 text-2xl font-medium">{report.name}</h2>
                 <p className="mt-2 text-sm text-slate-500">{report.scope} · July 2026</p>
               </div>
-              <div className="text-right text-xs text-slate-500">{reportId}<br />Generated 25 Jul 2026</div>
+              <div className="text-right text-xs text-slate-500">
+                {reportId}
+                <br />
+                Generated 25 Jul 2026
+              </div>
             </div>
             <div className="mt-8 grid grid-cols-3 gap-4">
-              {[["Energy performance", "-4.8%"], ["Verified saving", "IDR 1.15 B"], ["Data confidence", "98.4%"]].map(([label, value]) => (
+              {[
+                ["Energy performance", "-4.8%"],
+                ["Verified saving", "IDR 1.15 B"],
+                ["Data confidence", "98.4%"],
+              ].map(([label, value]) => (
                 <div key={label} className="border border-slate-200 rounded-md p-4">
                   <div className="text-xs text-slate-500">{label}</div>
                   <div className="mt-2 text-xl font-medium">{value}</div>
@@ -230,18 +313,31 @@ function ReportPreview({
             </div>
             <h3 className="mt-10 text-sm font-medium">Executive findings</h3>
             <div className="mt-3 space-y-3 text-sm leading-relaxed text-slate-600">
-              <p>Energy performance remains ahead of the normalized monthly target, supported by verified utility optimization and improved demand control.</p>
-              <p>Peak-demand exposure is concentrated in four flexible loads. A coordinated operating sequence can avoid an estimated IDR 42.6 million charge during the current interval.</p>
+              <p>
+                Energy performance remains ahead of the normalized monthly target, supported by
+                verified utility optimization and improved demand control.
+              </p>
+              <p>
+                Peak-demand exposure is concentrated in four flexible loads. A coordinated operating
+                sequence can avoid an estimated IDR 42.6 million charge during the current interval.
+              </p>
               <p>Two data-quality exceptions require validation before the next billing-period close.</p>
             </div>
             <div className="mt-10 h-44 rounded-md border border-slate-200 bg-slate-50 p-4">
               <div className="text-xs text-slate-500">Monthly energy trajectory</div>
               <div className="mt-6 flex h-24 items-end gap-3">
-                {reportTrend.map((height, index) => <div key={index} className="flex-1 rounded-t-sm bg-cyan-700/80" style={{ height: `${height}%` }} />)}
+                {reportTrend.map((height, index) => (
+                  <div
+                    key={index}
+                    className="flex-1 rounded-t-sm bg-cyan-700/80"
+                    style={{ height: `${height}%` }}
+                  />
+                ))}
               </div>
             </div>
             <div className="mt-10 border-t border-slate-200 pt-4 text-[10px] text-slate-400">
-              This report uses simulated demonstration data. All calculations include source, quality, and version traceability within ArGrid.
+              This report uses simulated demonstration data. All calculations include source, quality,
+              and version traceability within ArGrid.
             </div>
           </div>
         </div>
