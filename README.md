@@ -6,21 +6,54 @@ ArGrid is an open-source, frontend-only demonstration of an industrial energy in
 
 ## Demo capabilities
 
-- Multi-site industrial portfolio
-- Live telemetry simulation with pause/resume
-- Scenario engine: normal operation, peak demand, voltage dip, efficiency opportunity, and billing close
+- Multi-site industrial portfolio with independent manufacturing, data-center, and commercial-campus models
+- Deterministic simulation clock with Live 1×, Demo 60×, pause, step, and reset
+- Scenario state machines: normal operation, peak demand, voltage dip, efficiency opportunity, and billing close
+- Unified historian shared by Overview, Demand, Electrical Network, Analytics, Assets, Billing, Sustainability, and Data Health
+- Source/load/loss electrical reconciliation and daylight-bounded solar generation
+- Physically integrated energy, tariff cost, grid emissions, and contractual interval demand
+- Measurement-driven alarm lifecycle with active, returned, and acknowledged states
 - Guided customer demo across the main value story
 - Interactive electrical one-line workspace
-- Energy trends, heatmaps, comparisons, and EnPI views
+- Energy trends, heatmaps, comparisons, and site-specific EnPI views
 - Opportunity intelligence with cost, payback, confidence, and evidence
-- Action workflow and verified savings ledger
-- Demand forecasting and what-if load deferral
+- Action workflow and stable verified savings ledger
+- Demand forecasting and what-if load deferral without rewriting actual history
 - Alarm and power-quality investigation
 - Asset health and capacity outlook
 - Tenant billing and invoice workflow
 - Executive reports and data provenance
 - Browser-native PDF generation for reports, invoices, and paginated workspace snapshots
 - Responsive desktop and tablet experience
+
+## Simulation Engine v2
+
+ArGrid v1.2 uses a pure deterministic calculation layer rather than independent animated dashboard values.
+
+The causal chain is:
+
+```text
+simulation clock
+→ site schedule and feeder models
+→ electrical balance and solar
+→ measurements and historian
+→ interval demand and tariff cost
+→ alarms, billing, emissions, and UI workspaces
+```
+
+Core invariants include:
+
+```text
+plant load = sum of feeder power
+grid import + solar = plant load + modeled loss
+energy = integral of power over elapsed time
+cost = interval grid energy × active tariff
+emissions = integrated grid energy × site factor
+```
+
+Peak-demand scenarios add deterministic scheduled future starts to the forecast while preserving actual interval history. Data quality remains independent from electrical power quality. Verified savings do not increment as a live counter.
+
+See [Simulation Engine v2](docs/SIMULATION-ENGINE.md) for the architecture, site profiles, scenario lifecycle, calculation boundaries, and production limitations.
 
 ## PDF engine
 
@@ -61,6 +94,7 @@ Production validation:
 
 ```bash
 npm run typecheck
+npm run audit
 npm run lint
 npm run build
 npm run preview
@@ -80,22 +114,28 @@ The included workflow builds `dist/` and deploys it using GitHub Pages Actions. 
 - [Engineering audit](AUDIT.md)
 - [Guided customer demo](docs/DEMO-SCRIPT.md)
 - [Architecture and production boundary](docs/ARCHITECTURE.md)
+- [Simulation Engine v2](docs/SIMULATION-ENGINE.md)
 
 ## Project structure
 
 ```text
 src/
-├── components/       Application shell and reusable UI
-├── lib/              Simulation runtime, PDF engine, and demo domain data
-├── routes/           File-based application workspaces
-├── styles.css        ArGrid design system and Tailwind theme
-├── main.tsx          Static SPA entry point
-└── router.tsx        Hash-history router configuration
+├── components/             Application shell and reusable UI
+├── lib/
+│   ├── simulation-engine.ts Pure deterministic industrial calculations
+│   ├── simulation.tsx       React clock, commands, and state provider
+│   ├── simulation-calibration.ts Forecast calibration and local-time labels
+│   ├── pdf-engine.ts        Client-side report and invoice generation
+│   └── ...                  Domain data and supporting utilities
+├── routes/                 File-based application workspaces
+├── styles.css              ArGrid design system and Tailwind theme
+├── main.tsx                Static SPA entry point
+└── router.tsx              Hash-history router configuration
 ```
 
 ## Integration direction
 
-The frontend uses domain-oriented mock data and a simulation context. A production integration should introduce a backend adapter for time-series data, topology, alarms, billing, and audit APIs. Browsers should not connect directly to protection relays, meters, PLCs, or RTUs.
+The frontend uses a deterministic simulation adapter. A production integration should replace that adapter with secured APIs for time-series data, topology, alarms, billing, and audit services. Browsers should not connect directly to protection relays, meters, PLCs, or RTUs.
 
 Potential backend protocols through a secured gateway include Modbus TCP, OPC UA, MQTT, and IEC 61850 adapters.
 
@@ -104,6 +144,7 @@ Potential backend protocols through a secured gateway include Modbus TCP, OPC UA
 - All values, events, waveforms, invoices, and savings are simulated.
 - “Control” interactions are presentation-only.
 - The application is not revenue-grade metering or fiscal invoicing software.
+- The deterministic model is designed for customer demonstration, not certified electrical studies or protection decisions.
 - PDF outputs are demonstration documents and do not carry digital signatures or certified archival guarantees.
 - The application has not been certified against IEC 62443, ISO 50001, IEC 61000-4-30, or other industrial standards.
 - Production deployments require cybersecurity review, audit controls, validated calculations, and jurisdiction-specific compliance.
