@@ -24,56 +24,16 @@ jobs:
           package-manager-cache: false
 
       - name: Install dependencies
-        id: install
-        continue-on-error: true
-        shell: bash
-        run: npm install --no-audit --no-fund > npm-install.log 2>&1
-
-      - name: Upload npm diagnostic log
-        if: always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: npm-install-log
-          path: npm-install.log
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Stop after dependency failure
-        if: steps.install.outcome == 'failure'
-        run: |
-          tail -n 100 npm-install.log
-          exit 1
+        run: npm install --no-audit --no-fund
 
       - name: Type check
-        if: steps.install.outcome == 'success'
         run: npm run typecheck
 
       - name: Audit project structure
-        if: steps.install.outcome == 'success'
         run: npm run audit
 
       - name: Lint
-        id: lint
-        if: steps.install.outcome == 'success'
-        continue-on-error: true
-        shell: bash
-        run: npm run lint > eslint.log 2>&1
-
-      - name: Upload lint diagnostic log
-        if: steps.install.outcome == 'success' && always()
-        uses: actions/upload-artifact@v5
-        with:
-          name: eslint-log
-          path: eslint.log
-          if-no-files-found: error
-          retention-days: 1
-
-      - name: Stop after lint failure
-        if: steps.install.outcome == 'success' && steps.lint.outcome == 'failure'
-        run: |
-          tail -n 120 eslint.log
-          exit 1
+        run: npm run lint
 
       - name: Production build
-        if: steps.install.outcome == 'success' && steps.lint.outcome == 'success'
         run: npm run build
