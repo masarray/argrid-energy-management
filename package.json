@@ -1,6 +1,6 @@
 {
   "name": "argrid-energy-management",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Open-source industrial energy intelligence and electrical operations demo.",
   "private": false,
   "license": "GPL-3.0-only",
@@ -13,7 +13,8 @@
     "typecheck": "tsc --noEmit",
     "audit": "node scripts/audit-project.mjs",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.16",
@@ -31,18 +32,16 @@
     "@types/react-dom": "19.2.0",
     "@vitejs/plugin-react": "5.2.0",
     "eslint": "9.32.0",
-    "eslint-config-prettier": "10.1.1",
-    "eslint-plugin-prettier": "5.2.6",
     "eslint-plugin-react-hooks": "5.2.0",
     "eslint-plugin-react-refresh": "0.4.20",
     "globals": "15.15.0",
     "prettier": "3.7.3",
     "typescript": "5.8.3",
     "typescript-eslint": "8.56.1",
-    "vite": "8.0.16",
+    "vite": "7.3.6",
     "vite-tsconfig-paths": "6.0.2"
   },
   "engines": {
-    "node": ">=22.12.0"
+    "node": ">=22.12.0 <25"
   }
 }
