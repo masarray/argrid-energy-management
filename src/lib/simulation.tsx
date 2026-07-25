@@ -1,4 +1,13 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import {
   DEMO_START_MS,
   buildSimulationSnapshot,
@@ -62,6 +71,7 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
   const [running, setRunning] = useState(true);
   const [timeScale, setTimeScale] = useState<TimeScale>(1);
   const [tick, setTick] = useState(0);
+  const tickRef = useRef(0);
   const [siteId, setSiteIdState] = useState<DemoSiteId>("cikarang");
   const [guidedDemoOpen, setGuidedDemoOpen] = useState(false);
   const [now, setNow] = useState(() => new Date(DEMO_START_MS));
@@ -71,47 +81,64 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!running) return;
     const interval = window.setInterval(() => {
-      setTick((value) => value + 1);
+      setTick((value) => {
+        const next = value + 1;
+        tickRef.current = next;
+        return next;
+      });
       setNow((value) => new Date(value.getTime() + timeScale * 1_000));
     }, 1_000);
     return () => window.clearInterval(interval);
   }, [running, timeScale]);
 
-  const setScenario = (nextScenario: ScenarioId) => {
+  const setScenario = useCallback((nextScenario: ScenarioId) => {
     setScenarioState(nextScenario);
-    setScenarioStartedAtTick(tick);
+    setScenarioStartedAtTick(tickRef.current);
     setDemandResponseIds([]);
-  };
+  }, []);
 
-  const setSiteId = (nextSiteId: DemoSiteId) => {
+  const setSiteId = useCallback((nextSiteId: DemoSiteId) => {
     setSiteIdState(nextSiteId);
     setScenarioState("normal");
-    setScenarioStartedAtTick(tick);
+    setScenarioStartedAtTick(tickRef.current);
     setDemandResponseIds([]);
     setAcknowledgedIds(new Set());
-  };
+  }, []);
 
-  const resetScenario = () => {
+  const resetScenario = useCallback(() => {
     setScenarioState("normal");
-    setScenarioStartedAtTick(tick);
+    setScenarioStartedAtTick(tickRef.current);
     setDemandResponseIds([]);
-  };
+  }, []);
 
-  const resetSimulation = () => {
+  const resetSimulation = useCallback(() => {
     setNow(new Date(DEMO_START_MS));
     setTick(0);
+    tickRef.current = 0;
     setScenarioStartedAtTick(0);
     setScenarioState("normal");
     setDemandResponseIds([]);
     setAcknowledgedIds(new Set());
     setRunning(true);
     setTimeScale(1);
-  };
+  }, []);
 
-  const stepForward = (minutes = 5) => {
+  const stepForward = useCallback((minutes = 5) => {
     setNow((value) => new Date(value.getTime() + minutes * 60_000));
-    setTick((value) => value + 1);
-  };
+    setTick((value) => {
+      const next = value + 1;
+      tickRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const acknowledgeAlarm = useCallback((id: string) => {
+    setAcknowledgedIds((current) => {
+      const next = new Set(current);
+      next.add(id);
+      return next;
+    });
+  }, []);
 
   const scenarioElapsedSeconds = Math.max(0, tick - scenarioStartedAtTick);
   const acknowledgedKey = [...acknowledgedIds].sort().join("|");
@@ -126,16 +153,8 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
         responseIds: demandResponseIds,
         acknowledgedIds,
       }),
-    [acknowledgedIds, acknowledgedKey, demandResponseIds, now, scenario, scenarioElapsedSeconds, siteId, timeScale],
+    [acknowledgedKey, demandResponseIds, now, scenario, scenarioElapsedSeconds, siteId, timeScale],
   );
-
-  const acknowledgeAlarm = (id: string) => {
-    setAcknowledgedIds((current) => {
-      const next = new Set(current);
-      next.add(id);
-      return next;
-    });
-  };
 
   const value = useMemo<SimulationContextValue>(
     () => ({
@@ -170,13 +189,19 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
       utilityBillValidation: snapshot.utilityBillValidation,
     }),
     [
+      acknowledgeAlarm,
       demandResponseIds,
       guidedDemoOpen,
       now,
+      resetScenario,
+      resetSimulation,
       running,
       scenario,
+      setScenario,
+      setSiteId,
       siteId,
       snapshot,
+      stepForward,
       tick,
       timeScale,
     ],
