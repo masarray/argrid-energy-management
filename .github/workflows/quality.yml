@@ -24,7 +24,15 @@ jobs:
           package-manager-cache: false
 
       - name: Install dependencies
-        run: npm install --no-audit --no-fund
+        shell: bash
+        run: |
+          if ! npm install --no-audit --no-fund > npm-install.log 2>&1; then
+            echo "::group::npm install failure"
+            tail -n 100 npm-install.log
+            echo "::endgroup::"
+            exit 1
+          fi
+          tail -n 20 npm-install.log
 
       - name: Type check
         run: npm run typecheck
