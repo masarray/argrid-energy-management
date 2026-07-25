@@ -1,0 +1,35 @@
+# Changelog
+
+All notable changes to ArGrid will be documented in this file.
+
+## 1.0.0 — 2026-07-25
+
+### Added
+
+- Static Vite and React application architecture for GitHub Pages.
+- Hash-history navigation across thirteen industrial product workspaces.
+- Three-site deterministic simulation with live and paused operation.
+- Normal, peak-demand, voltage-dip, efficiency and billing scenarios.
+- Six-step guided customer demonstration.
+- Responsive premium industrial application shell.
+- Portfolio, opportunity, action, savings, demand, asset, report and data-health workspaces.
+- Interactive electrical network and power-quality investigation.
+- Billing validation, invoice preview and traceability workflow.
+- Original ArGrid visual identity and favicon.
+- GitHub Pages and quality-check workflows.
+- GPL-3.0-only license, contribution guide, security policy and architecture documentation.
+- Automated repository audit command.
+
+### Changed
+
+- Converted the project from a server-rendered builder-specific stack to a portable static SPA.
+- Reduced dependencies to the packages actively used by the demo.
+- Reworked static dashboard values into coherent, scenario-driven telemetry.
+- Improved responsive layouts, accessibility states and reduced-motion behavior.
+
+### Removed
+
+- Proprietary builder configuration and metadata.
+- Server-start and server runtime files.
+- Unused component-library, form and utility dependencies.
+- Third-party builder branding and favicon.
