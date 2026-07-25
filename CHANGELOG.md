@@ -2,6 +2,43 @@
 
 All notable changes to ArGrid will be documented in this file.
 
+## 1.2.0 — 2026-07-25
+
+### Added
+
+- Pure deterministic Simulation Engine v2.
+- Independent manufacturing, data-center, and commercial-campus site profiles.
+- Live 1× and Demo 60× clock modes, pause, five-minute stepping, and deterministic reset.
+- Site operating schedules, feeder models, daylight-bounded solar, transformer loss, and source/load balance.
+- Unified 24-hour historian shared across operational workspaces.
+- Physically integrated daily energy, tariff cost, and grid-emission calculations.
+- Contractual 15- or 30-minute demand intervals, forward forecast, intervention threshold, and charge exposure.
+- Scenario state machines for peak demand, voltage dip, efficiency drift, and billing close.
+- Measurement-driven alarm lifecycle with active, returned, and acknowledged states.
+- Tariff and allocation-based tenant billing plus utility-invoice discrepancy validation.
+- Simulation architecture and calculation-boundary documentation.
+
+### Changed
+
+- Premium Overview now uses reconciled engine data instead of independent visual datasets.
+- Electrical Network now derives feeder power, voltage, current, loading, PF, THD, transformer loading, and selected-feeder history from one snapshot.
+- Demand & Cost preserves actual interval history while selected responses modify only the forecast.
+- Alarms & Power Quality no longer fabricates normal standing alarms.
+- Portfolio uses independently calculated site profiles rather than scaled static rows.
+- Analytics provides site-specific heatmaps, live energy split, and historian-linked EnPI or PUE proxy.
+- Assets derives loading, spare capacity, loss, and scenario condition from the current electrical model.
+- Billing uses a shared tariff, interval, allocation, and source-quality engine.
+- Sustainability derives emissions from integrated grid energy and prevents solar double counting.
+- Data Health separates telemetry quality from electrical power quality and blocks billing only for measurement-quality exceptions.
+- Verified savings remains stable until a future verified action workflow changes it.
+
+### Preserved
+
+- Static GitHub Pages deployment.
+- Browser-only public demo boundary.
+- GPL-3.0-only licensing.
+- No Lovable runtime, SSR, Bun, or external simulation service.
+
 ## 1.1.0 — 2026-07-25
 
 ### Added

@@ -1,63 +1,48 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
+import { calibrateSimulationSnapshot } from "./simulation-calibration";
+import {
+  DEMO_START_MS,
+  buildSimulationSnapshot,
+  demoSites,
+  scenarioOptions,
+  type AlarmSnapshot,
+  type BillingTenant,
+  type DemandContributor,
+  type DemandForecastPoint,
+  type DemoSiteId,
+  type FeederSnapshot,
+  type HistorianPoint,
+  type LiveMetrics,
+  type PowerQualityEvent,
+  type ScenarioId,
+  type ScenarioState,
+  type TimeScale,
+  type UtilityBillValidation,
+} from "./simulation-engine";
 
-export type ScenarioId = "normal" | "peak-demand" | "voltage-dip" | "efficiency" | "billing";
-export type DemoSiteId = "cikarang" | "batam-dc" | "surabaya-campus";
-
-export const scenarioOptions: Array<{ id: ScenarioId; label: string; description: string }> = [
-  { id: "normal", label: "Normal operation", description: "Stable utility supply and balanced production load." },
-  { id: "peak-demand", label: "Peak-demand risk", description: "Large process loads are converging near the contract limit." },
-  { id: "voltage-dip", label: "Voltage-dip event", description: "A simulated 82% Un voltage dip affects the utility feeder." },
-  { id: "efficiency", label: "Efficiency opportunity", description: "Compressed-air and HVAC waste create an actionable saving." },
-  { id: "billing", label: "Billing close", description: "Tenant invoices enter validation and approval workflow." },
-];
-
-export const demoSites = {
-  cikarang: {
-    id: "cikarang" as const,
-    name: "Cikarang Manufacturing Complex",
-    region: "West Java Industrial Region",
-    shortName: "Cikarang Plant",
-    type: "Manufacturing",
-    multiplier: 1,
-  },
-  "batam-dc": {
-    id: "batam-dc" as const,
-    name: "Batam Edge Data Center",
-    region: "Riau Islands Digital Zone",
-    shortName: "Batam DC",
-    type: "Data Center",
-    multiplier: 0.72,
-  },
-  "surabaya-campus": {
-    id: "surabaya-campus" as const,
-    name: "Surabaya Commercial Campus",
-    region: "East Java Metropolitan Area",
-    shortName: "Surabaya Campus",
-    type: "Commercial Campus",
-    multiplier: 0.46,
-  },
-};
-
-export type LiveMetrics = {
-  currentPower: number;
-  todayEnergy: number;
-  todayCost: number;
-  projectedDemand: number;
-  demandLimit: number;
-  powerFactor: number;
-  solarPower: number;
-  dataHealth: number;
-  criticalAlarms: number;
-  activeAlarms: number;
-  verifiedSavings: number;
-  renewableShare: number;
-};
+export { demoSites, scenarioOptions };
+export type { DemoSiteId, LiveMetrics, ScenarioId, TimeScale };
 
 type SimulationContextValue = {
   scenario: ScenarioId;
   setScenario: (scenario: ScenarioId) => void;
+  scenarioState: ScenarioState;
   running: boolean;
   setRunning: (running: boolean) => void;
+  timeScale: TimeScale;
+  setTimeScale: (scale: TimeScale) => void;
+  stepForward: (minutes?: number) => void;
+  resetSimulation: () => void;
+  resetScenario: () => void;
   metrics: LiveMetrics;
   now: Date;
   tick: number;
@@ -66,72 +51,168 @@ type SimulationContextValue = {
   site: (typeof demoSites)[DemoSiteId];
   guidedDemoOpen: boolean;
   setGuidedDemoOpen: (open: boolean) => void;
+  feeders: FeederSnapshot[];
+  historian24h: HistorianPoint[];
+  demandForecast: DemandForecastPoint[];
+  demandContributors: DemandContributor[];
+  demandResponseIds: string[];
+  setDemandResponseIds: (ids: string[]) => void;
+  alarms: AlarmSnapshot[];
+  acknowledgeAlarm: (id: string) => void;
+  powerQualityEvents: PowerQualityEvent[];
+  billingTenants: BillingTenant[];
+  utilityBillValidation: UtilityBillValidation;
 };
 
 const SimulationContext = createContext<SimulationContextValue | null>(null);
 
 export function SimulationProvider({ children }: { children: ReactNode }) {
-  const [scenario, setScenario] = useState<ScenarioId>("normal");
+  const [scenario, setScenarioState] = useState<ScenarioId>("normal");
+  const [scenarioStartedAtTick, setScenarioStartedAtTick] = useState(0);
   const [running, setRunning] = useState(true);
+  const [timeScale, setTimeScale] = useState<TimeScale>(1);
   const [tick, setTick] = useState(0);
-  const [siteId, setSiteId] = useState<DemoSiteId>("cikarang");
+  const tickRef = useRef(0);
+  const [siteId, setSiteIdState] = useState<DemoSiteId>("cikarang");
   const [guidedDemoOpen, setGuidedDemoOpen] = useState(false);
-  const [now, setNow] = useState(() => new Date());
+  const [now, setNow] = useState(() => new Date(DEMO_START_MS));
+  const [demandResponseIds, setDemandResponseIds] = useState<string[]>([]);
+  const [acknowledgedIds, setAcknowledgedIds] = useState<Set<string>>(() => new Set());
 
   useEffect(() => {
     if (!running) return;
     const interval = window.setInterval(() => {
-      setTick((value) => value + 1);
-      setNow(new Date());
+      setTick((value) => {
+        const next = value + 1;
+        tickRef.current = next;
+        return next;
+      });
+      setNow((value) => new Date(value.getTime() + timeScale * 1_000));
     }, 1_000);
     return () => window.clearInterval(interval);
-  }, [running]);
+  }, [running, timeScale]);
 
-  const site = demoSites[siteId];
-  const metrics = useMemo<LiveMetrics>(() => {
-    const drift = Math.sin(tick / 4) * 0.075 + Math.sin(tick / 11) * 0.035;
-    const scenarioPower = scenario === "peak-demand" ? 0.92 : scenario === "efficiency" ? 0.34 : 0;
-    const scenarioDemand = scenario === "peak-demand" ? 0.78 : 0.18;
-    const factor = site.multiplier;
-    const currentPower = Math.max(0.65, (4.82 + drift + scenarioPower) * factor);
-    const demandLimit = 6 * factor;
-    const projectedDemand = Math.min(demandLimit * 1.12, (5.31 + scenarioDemand + drift * 1.4) * factor);
-    const todayEnergy = (68_420 + tick * currentPower * 0.275) * factor;
-    const todayCost = todayEnergy * 1_200;
-    const voltageEvent = scenario === "voltage-dip";
+  const setScenario = useCallback((nextScenario: ScenarioId) => {
+    setScenarioState(nextScenario);
+    setScenarioStartedAtTick(tickRef.current);
+    setDemandResponseIds([]);
+  }, []);
 
-    return {
-      currentPower,
-      todayEnergy,
-      todayCost,
-      projectedDemand,
-      demandLimit,
-      powerFactor: scenario === "peak-demand" ? 0.9 : 0.94 + Math.sin(tick / 9) * 0.004,
-      solarPower: Math.max(0.12, 1.32 * factor + Math.sin(tick / 8) * 0.03),
-      dataHealth: voltageEvent ? 97.8 : 98.4 + Math.sin(tick / 15) * 0.15,
-      criticalAlarms: voltageEvent ? 2 : scenario === "peak-demand" ? 1 : 0,
-      activeAlarms: voltageEvent ? 5 : scenario === "peak-demand" ? 4 : 3,
-      verifiedSavings: 1_146_000_000 + tick * 42_500,
-      renewableShare: siteId === "batam-dc" ? 8.7 : siteId === "surabaya-campus" ? 18.9 : 12.4,
-    };
-  }, [scenario, site.multiplier, siteId, tick]);
+  const setSiteId = useCallback((nextSiteId: DemoSiteId) => {
+    setSiteIdState(nextSiteId);
+    setScenarioState("normal");
+    setScenarioStartedAtTick(tickRef.current);
+    setDemandResponseIds([]);
+    setAcknowledgedIds(new Set());
+  }, []);
 
-  const value = useMemo(
+  const resetScenario = useCallback(() => {
+    setScenarioState("normal");
+    setScenarioStartedAtTick(tickRef.current);
+    setDemandResponseIds([]);
+  }, []);
+
+  const resetSimulation = useCallback(() => {
+    setNow(new Date(DEMO_START_MS));
+    setTick(0);
+    tickRef.current = 0;
+    setScenarioStartedAtTick(0);
+    setScenarioState("normal");
+    setDemandResponseIds([]);
+    setAcknowledgedIds(new Set());
+    setRunning(true);
+    setTimeScale(1);
+  }, []);
+
+  const stepForward = useCallback((minutes = 5) => {
+    setNow((value) => new Date(value.getTime() + minutes * 60_000));
+    setTick((value) => {
+      const next = value + 1;
+      tickRef.current = next;
+      return next;
+    });
+  }, []);
+
+  const acknowledgeAlarm = useCallback((id: string) => {
+    setAcknowledgedIds((current) => {
+      const next = new Set(current);
+      next.add(id);
+      return next;
+    });
+  }, []);
+
+  const scenarioElapsedSeconds = Math.max(0, tick - scenarioStartedAtTick);
+  const snapshot = useMemo(() => {
+    const raw = buildSimulationSnapshot({
+      siteId,
+      now,
+      scenario,
+      scenarioElapsedSeconds,
+      timeScale,
+      responseIds: demandResponseIds,
+      acknowledgedIds,
+    });
+    return calibrateSimulationSnapshot({
+      snapshot: raw,
+      site: demoSites[siteId],
+      siteId,
+      scenario,
+      scenarioState: raw.scenarioState,
+      responseIds: demandResponseIds,
+      acknowledgedIds,
+      now,
+    });
+  }, [acknowledgedIds, demandResponseIds, now, scenario, scenarioElapsedSeconds, siteId, timeScale]);
+
+  const value = useMemo<SimulationContextValue>(
     () => ({
       scenario,
       setScenario,
+      scenarioState: snapshot.scenarioState,
       running,
       setRunning,
-      metrics,
+      timeScale,
+      setTimeScale,
+      stepForward,
+      resetSimulation,
+      resetScenario,
+      metrics: snapshot.metrics,
       now,
       tick,
       siteId,
       setSiteId,
-      site,
+      site: demoSites[siteId],
       guidedDemoOpen,
       setGuidedDemoOpen,
+      feeders: snapshot.feeders,
+      historian24h: snapshot.historian24h,
+      demandForecast: snapshot.demandForecast,
+      demandContributors: snapshot.demandContributors,
+      demandResponseIds,
+      setDemandResponseIds,
+      alarms: snapshot.alarms,
+      acknowledgeAlarm,
+      powerQualityEvents: snapshot.powerQualityEvents,
+      billingTenants: snapshot.billingTenants,
+      utilityBillValidation: snapshot.utilityBillValidation,
     }),
-    [guidedDemoOpen, metrics, now, running, scenario, site, siteId, tick],
+    [
+      acknowledgeAlarm,
+      demandResponseIds,
+      guidedDemoOpen,
+      now,
+      resetScenario,
+      resetSimulation,
+      running,
+      scenario,
+      setScenario,
+      setSiteId,
+      siteId,
+      snapshot,
+      stepForward,
+      tick,
+      timeScale,
+    ],
   );
 
   return <SimulationContext.Provider value={value}>{children}</SimulationContext.Provider>;

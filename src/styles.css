@@ -4,10 +4,9 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * ArGrid Energy Management — Design System
- * Operations Dark theme (default). Premium industrial command center.
- * Deep graphite background, fine cool-gray borders, restrained cyan accent,
- * amber/orange/red for abnormal states.
+ * ArGrid Energy Management — Premium Industrial Design System
+ * Calm operational hierarchy, precise surfaces, restrained signal color,
+ * high-density information and polished command-center depth.
  */
 
 @theme inline {
@@ -68,74 +67,120 @@
 :root {
   --radius: 8px;
 
-  /* Operations Dark */
-  --background: oklch(0.18 0.008 240);
-  --foreground: oklch(0.95 0.005 240);
-  --surface: oklch(0.21 0.008 240);
-  --surface-2: oklch(0.235 0.009 240);
-  --surface-3: oklch(0.27 0.01 240);
+  --background: oklch(0.155 0.012 235);
+  --foreground: oklch(0.955 0.006 225);
+  --surface: oklch(0.202 0.013 235);
+  --surface-2: oklch(0.23 0.014 235);
+  --surface-3: oklch(0.272 0.015 235);
 
-  --card: oklch(0.21 0.008 240);
-  --card-foreground: oklch(0.95 0.005 240);
-  --popover: oklch(0.235 0.009 240);
-  --popover-foreground: oklch(0.95 0.005 240);
+  --card: oklch(0.205 0.013 235);
+  --card-foreground: oklch(0.955 0.006 225);
+  --popover: oklch(0.23 0.014 235);
+  --popover-foreground: oklch(0.955 0.006 225);
 
-  --primary: oklch(0.78 0.14 200);
-  --primary-foreground: oklch(0.15 0.01 240);
-
-  --secondary: oklch(0.27 0.01 240);
-  --secondary-foreground: oklch(0.92 0.005 240);
-  --muted: oklch(0.25 0.008 240);
-  --muted-foreground: oklch(0.63 0.015 240);
-  --accent: oklch(0.3 0.02 220);
-  --accent-foreground: oklch(0.95 0.005 240);
+  --primary: oklch(0.77 0.135 198);
+  --primary-foreground: oklch(0.145 0.018 235);
+  --secondary: oklch(0.27 0.012 235);
+  --secondary-foreground: oklch(0.93 0.006 225);
+  --muted: oklch(0.25 0.011 235);
+  --muted-foreground: oklch(0.68 0.017 225);
+  --accent: oklch(0.3 0.025 215);
+  --accent-foreground: oklch(0.96 0.006 225);
 
   --destructive: oklch(0.62 0.22 25);
   --destructive-foreground: oklch(0.98 0.005 240);
 
-  --border: oklch(0.3 0.008 240);
-  --border-strong: oklch(0.38 0.01 240);
-  --input: oklch(0.3 0.008 240);
-  --ring: oklch(0.78 0.14 200);
+  --border: oklch(0.305 0.013 235);
+  --border-strong: oklch(0.39 0.017 230);
+  --input: oklch(0.3 0.013 235);
+  --ring: oklch(0.77 0.135 198);
 
-  /* Signal colors */
-  --cyan: oklch(0.78 0.14 200);
+  --cyan: oklch(0.77 0.135 198);
   --amber: oklch(0.82 0.16 85);
   --orange: oklch(0.72 0.19 55);
   --red: oklch(0.65 0.24 25);
   --green: oklch(0.72 0.16 155);
   --violet: oklch(0.7 0.15 290);
 
-  --chart-1: oklch(0.78 0.14 200);
+  --chart-1: oklch(0.77 0.135 198);
   --chart-2: oklch(0.72 0.16 155);
   --chart-3: oklch(0.82 0.16 85);
   --chart-4: oklch(0.72 0.19 55);
   --chart-5: oklch(0.7 0.15 290);
 
-  --sidebar: oklch(0.16 0.008 240);
-  --sidebar-foreground: oklch(0.9 0.005 240);
-  --sidebar-primary: oklch(0.78 0.14 200);
-  --sidebar-primary-foreground: oklch(0.15 0.01 240);
-  --sidebar-accent: oklch(0.24 0.01 240);
-  --sidebar-accent-foreground: oklch(0.95 0.005 240);
-  --sidebar-border: oklch(0.26 0.008 240);
-  --sidebar-ring: oklch(0.78 0.14 200);
+  --sidebar: oklch(0.135 0.012 235);
+  --sidebar-foreground: oklch(0.91 0.006 225);
+  --sidebar-primary: oklch(0.77 0.135 198);
+  --sidebar-primary-foreground: oklch(0.145 0.018 235);
+  --sidebar-accent: oklch(0.215 0.016 235);
+  --sidebar-accent-foreground: oklch(0.96 0.006 225);
+  --sidebar-border: oklch(0.255 0.013 235);
+  --sidebar-ring: oklch(0.77 0.135 198);
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
   }
-  html, body, #root {
+
+  html,
+  body,
+  #root {
     min-height: 100%;
   }
-  html, body {
+
+  html,
+  body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
+    text-rendering: geometricPrecision;
   }
+
+  body {
+    margin: 0;
+    min-width: 320px;
+    overflow: hidden;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
+  button:not(:disabled),
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+    opacity: 0.45;
+  }
+
+  input[type="checkbox"] {
+    accent-color: var(--color-primary);
+  }
+
+  ::selection {
+    background: color-mix(in oklch, var(--color-primary) 28%, transparent);
+    color: var(--color-foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid color-mix(in oklch, var(--color-primary) 72%, transparent);
+    outline-offset: 2px;
+  }
+
+  * {
+    scrollbar-color: var(--color-border-strong) transparent;
+    scrollbar-width: thin;
+  }
+
   .tabular {
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
@@ -156,48 +201,10 @@
 
 @utility grid-bg {
   background-image:
-    linear-gradient(var(--color-border) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-border) 1px, transparent 1px);
+    linear-gradient(color-mix(in oklch, var(--color-border) 64%, transparent) 1px, transparent 1px),
+    linear-gradient(90deg, color-mix(in oklch, var(--color-border) 64%, transparent) 1px, transparent 1px);
   background-size: 24px 24px;
   background-position: -1px -1px;
-}
-
-
-@layer base {
-  body {
-    margin: 0;
-    min-width: 320px;
-    overflow: hidden;
-  }
-  button,
-  input,
-  select,
-  textarea {
-    font: inherit;
-  }
-  button:not(:disabled),
-  select:not(:disabled) {
-    cursor: pointer;
-  }
-  button:disabled {
-    cursor: not-allowed;
-    opacity: 0.45;
-  }
-  input[type="checkbox"] {
-    accent-color: var(--color-primary);
-  }
-  ::selection {
-    background: color-mix(in oklch, var(--color-primary) 28%, transparent);
-    color: var(--color-foreground);
-  }
-  :focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--color-primary) 72%, transparent);
-    outline-offset: 2px;
-  }
-  * {
-    scrollbar-color: var(--color-border-strong) transparent;
-    scrollbar-width: thin;
-  }
 }
 
 @layer components {
@@ -212,40 +219,275 @@
     padding: 0.38rem 0.7rem;
     font-size: 0.6875rem;
     font-weight: 500;
-    transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease, transform 120ms ease;
+    transition:
+      border-color 120ms ease,
+      background-color 120ms ease,
+      color 120ms ease,
+      transform 120ms ease,
+      box-shadow 120ms ease;
   }
+
   .btn-primary {
     border: 1px solid color-mix(in oklch, var(--color-primary) 48%, transparent);
     background: color-mix(in oklch, var(--color-primary) 17%, var(--color-surface));
     color: var(--color-primary);
+    box-shadow: inset 0 1px 0 color-mix(in oklch, white 5%, transparent);
   }
+
   .btn-primary:hover:not(:disabled) {
+    border-color: color-mix(in oklch, var(--color-primary) 70%, transparent);
     background: color-mix(in oklch, var(--color-primary) 24%, var(--color-surface));
-    border-color: color-mix(in oklch, var(--color-primary) 68%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklch, var(--color-primary) 8%, transparent);
   }
+
   .btn-secondary {
     border: 1px solid var(--color-border);
-    background: var(--color-surface-2);
+    background: linear-gradient(180deg, color-mix(in oklch, white 2%, var(--color-surface-2)), var(--color-surface-2));
     color: var(--color-foreground);
   }
+
   .btn-secondary:hover:not(:disabled) {
     border-color: var(--color-border-strong);
     background: var(--color-surface-3);
   }
+
   .btn-primary:active:not(:disabled),
   .btn-secondary:active:not(:disabled) {
     transform: translateY(1px);
   }
+
   .app-canvas {
     background-image:
-      radial-gradient(circle at 15% -10%, color-mix(in oklch, var(--color-primary) 5%, transparent), transparent 29rem),
-      linear-gradient(180deg, color-mix(in oklch, var(--color-surface) 23%, transparent), transparent 9rem);
+      radial-gradient(circle at 13% -16%, color-mix(in oklch, var(--color-primary) 7%, transparent), transparent 34rem),
+      radial-gradient(circle at 88% 0%, color-mix(in oklch, var(--color-violet) 3.5%, transparent), transparent 29rem),
+      linear-gradient(180deg, color-mix(in oklch, var(--color-surface) 18%, transparent), transparent 11rem);
+    background-attachment: local;
   }
+
   .panel {
-    box-shadow: inset 0 1px 0 color-mix(in oklch, white 2.5%, transparent);
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(180deg, color-mix(in oklch, white 2.4%, transparent), transparent 5rem),
+      var(--color-surface);
+    border-color: color-mix(in oklch, var(--color-border) 88%, transparent);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.22),
+      0 10px 30px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 color-mix(in oklch, white 3.8%, transparent);
   }
+
+  .panel::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    border-radius: inherit;
+    background: linear-gradient(115deg, color-mix(in oklch, white 1.8%, transparent), transparent 35%);
+  }
+
+  .panel--accent {
+    border-color: color-mix(in oklch, var(--color-primary) 25%, var(--color-border));
+  }
+
+  .panel--critical {
+    border-color: color-mix(in oklch, var(--color-red) 28%, var(--color-border));
+  }
+
+  .panel--quiet {
+    background: color-mix(in oklch, var(--color-surface) 82%, transparent);
+    box-shadow: inset 0 1px 0 color-mix(in oklch, white 2.2%, transparent);
+  }
+
+  .panel-heading {
+    min-height: 2.875rem;
+    border-bottom: 1px solid color-mix(in oklch, var(--color-border) 80%, transparent);
+    background: linear-gradient(180deg, color-mix(in oklch, white 1.8%, transparent), transparent);
+  }
+
+  .panel-title {
+    text-shadow: 0 1px 0 rgba(0, 0, 0, 0.22);
+  }
+
   .panel-2 {
-    box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28), inset 0 1px 0 color-mix(in oklch, white 3%, transparent);
+    box-shadow:
+      0 18px 48px rgba(0, 0, 0, 0.28),
+      inset 0 1px 0 color-mix(in oklch, white 3%, transparent);
+  }
+
+  .metric-card {
+    position: relative;
+    min-height: 7.2rem;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklch, var(--color-border) 90%, transparent);
+    border-radius: 8px;
+    padding: 0.9rem 1rem 0.85rem;
+    background:
+      radial-gradient(circle at 100% 0%, color-mix(in oklch, currentColor 5.5%, transparent), transparent 8.5rem),
+      linear-gradient(180deg, color-mix(in oklch, white 2.8%, transparent), transparent 62%),
+      var(--color-surface);
+    color: var(--color-foreground);
+    box-shadow:
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 color-mix(in oklch, white 4%, transparent);
+    transition:
+      border-color 150ms ease,
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  .metric-card::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 2px;
+    background: transparent;
+  }
+
+  .metric-card:hover {
+    transform: translateY(-1px);
+    border-color: color-mix(in oklch, var(--color-border-strong) 78%, transparent);
+    box-shadow:
+      0 6px 18px rgba(0, 0, 0, 0.16),
+      inset 0 1px 0 color-mix(in oklch, white 4%, transparent);
+  }
+
+  .metric-card--neutral {
+    color: var(--color-foreground);
+  }
+
+  .metric-card--good {
+    color: var(--color-green);
+  }
+
+  .metric-card--warning {
+    color: var(--color-amber);
+  }
+
+  .metric-card--critical {
+    color: var(--color-red);
+  }
+
+  .metric-card--good::before {
+    background: var(--color-green);
+  }
+
+  .metric-card--warning::before {
+    background: var(--color-amber);
+  }
+
+  .metric-card--critical::before {
+    background: var(--color-red);
+  }
+
+  .metric-card > * {
+    color: initial;
+  }
+
+  .metric-card .metric-icon,
+  .metric-card .metric-spark {
+    color: currentColor;
+  }
+
+  .overview-command-strip {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-border);
+    box-shadow: inset 0 1px 0 color-mix(in oklch, white 3%, transparent);
+  }
+
+  .overview-command-item {
+    min-width: 0;
+    background: color-mix(in oklch, var(--color-surface) 92%, black 8%);
+    padding: 0.65rem 0.8rem;
+  }
+
+  .priority-insight {
+    position: relative;
+    overflow: hidden;
+    border: 1px solid color-mix(in oklch, var(--signal-color) 42%, var(--color-border));
+    border-radius: 9px;
+    background:
+      radial-gradient(circle at 0 50%, color-mix(in oklch, var(--signal-color) 12%, transparent), transparent 25rem),
+      linear-gradient(90deg, color-mix(in oklch, var(--signal-color) 6%, var(--color-surface)), var(--color-surface));
+    box-shadow:
+      0 10px 32px rgba(0, 0, 0, 0.14),
+      inset 0 1px 0 color-mix(in oklch, white 4%, transparent);
+  }
+
+  .priority-insight::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 3px;
+    background: var(--signal-color);
+  }
+
+  .priority-insight--warning {
+    --signal-color: var(--color-amber);
+  }
+
+  .priority-insight--critical {
+    --signal-color: var(--color-red);
+  }
+
+  .priority-insight--good {
+    --signal-color: var(--color-green);
+  }
+
+  .signal-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    min-height: 1.75rem;
+    border: 1px solid color-mix(in oklch, var(--signal-color) 28%, var(--color-border));
+    border-radius: 6px;
+    background: color-mix(in oklch, var(--signal-color) 7%, var(--color-surface-2));
+    padding: 0.25rem 0.55rem;
+  }
+
+  .energy-flow-stage {
+    border-radius: 7px;
+    background:
+      radial-gradient(circle at 50% 45%, color-mix(in oklch, var(--color-primary) 5%, transparent), transparent 18rem),
+      linear-gradient(color-mix(in oklch, var(--color-border) 35%, transparent) 1px, transparent 1px),
+      linear-gradient(90deg, color-mix(in oklch, var(--color-border) 35%, transparent) 1px, transparent 1px);
+    background-size: auto, 30px 30px, 30px 30px;
+  }
+
+  .section-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--color-muted-foreground);
+    font-size: 0.625rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .section-kicker::after {
+    content: "";
+    height: 1px;
+    flex: 1;
+    background: linear-gradient(90deg, var(--color-border), transparent);
+  }
+
+  header {
+    box-shadow: 0 1px 0 color-mix(in oklch, white 2%, transparent), 0 8px 24px rgba(0, 0, 0, 0.08);
+  }
+
+  aside {
+    background-image: linear-gradient(180deg, color-mix(in oklch, var(--color-primary) 2.5%, transparent), transparent 14rem);
+  }
+}
+
+@media (min-width: 768px) {
+  .overview-command-strip {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
 
