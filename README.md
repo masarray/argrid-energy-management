@@ -19,7 +19,21 @@ ArGrid is an open-source, frontend-only demonstration of an industrial energy in
 - Asset health and capacity outlook
 - Tenant billing and invoice workflow
 - Executive reports and data provenance
+- Browser-native PDF generation for reports, invoices, and paginated workspace snapshots
 - Responsive desktop and tablet experience
+
+## PDF engine
+
+ArGrid includes a client-side document engine that is loaded only when an export is requested. Operational and billing data remain inside the browser; the demo does not upload content to an external document-conversion service.
+
+Supported outputs:
+
+- Searchable executive reports with metrics, findings, trend graphics, source evidence, metadata, page numbering, and simulation disclaimers
+- Structured energy-allocation statements with charge breakdown, meter quality, tariff basis, and calculation trace
+- Branded multi-page snapshots of live ArGrid workspaces
+- Progress and completion feedback for long exports
+
+The PDF engine is designed as a frontend demonstration boundary. Production fiscal invoices, digital signatures, archival guarantees, and scheduled server-side delivery require validated backend services.
 
 ## Technology
 
@@ -29,6 +43,8 @@ ArGrid is an open-source, frontend-only demonstration of an industrial energy in
 - TanStack Router with hash history
 - Tailwind CSS 4
 - Recharts
+- jsPDF
+- html2canvas-pro
 
 Hash-based routing and relative build assets allow the same static build to work on GitHub Pages project sites and custom domains.
 
@@ -70,7 +86,7 @@ The included workflow builds `dist/` and deploys it using GitHub Pages Actions. 
 ```text
 src/
 ├── components/       Application shell and reusable UI
-├── lib/              Simulation runtime and demo domain data
+├── lib/              Simulation runtime, PDF engine, and demo domain data
 ├── routes/           File-based application workspaces
 ├── styles.css        ArGrid design system and Tailwind theme
 ├── main.tsx          Static SPA entry point
@@ -88,6 +104,7 @@ Potential backend protocols through a secured gateway include Modbus TCP, OPC UA
 - All values, events, waveforms, invoices, and savings are simulated.
 - “Control” interactions are presentation-only.
 - The application is not revenue-grade metering or fiscal invoicing software.
+- PDF outputs are demonstration documents and do not carry digital signatures or certified archival guarantees.
 - The application has not been certified against IEC 62443, ISO 50001, IEC 61000-4-30, or other industrial standards.
 - Production deployments require cybersecurity review, audit controls, validated calculations, and jurisdiction-specific compliance.
 

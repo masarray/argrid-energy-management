@@ -2,6 +2,29 @@
 
 All notable changes to ArGrid will be documented in this file.
 
+## 1.1.0 — 2026-07-25
+
+### Added
+
+- Browser-native PDF engine with lazy-loaded runtime dependencies.
+- Searchable executive report PDFs with metrics, findings, trend visualization, evidence, document metadata, and simulation disclaimers.
+- Structured energy-allocation statement generation with charge breakdown, meter quality, tariff basis, and calculation trace.
+- Branded multi-page dashboard snapshot generation.
+- Reusable export control with progress, completion, and failure feedback.
+- PDF engine capability and delivery information in the Reports workspace.
+- Local jsPDF compatibility typing for strict TypeScript validation.
+
+### Changed
+
+- Reports now generate real downloadable PDF documents instead of presentation-only preview actions.
+- Project documentation now describes privacy boundaries and production limitations for document generation.
+
+### Preserved
+
+- Static Vite and GitHub Pages architecture.
+- GPL-3.0-only licensing.
+- No Lovable, Bun, SSR, hosted builder runtime, or external document-conversion service.
+
 ## 1.0.0 — 2026-07-25
 
 ### Added
