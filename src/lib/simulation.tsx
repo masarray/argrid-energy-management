@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { calibrateSimulationSnapshot } from "./simulation-calibration";
 import {
   DEMO_START_MS,
   buildSimulationSnapshot,
@@ -141,20 +142,27 @@ export function SimulationProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const scenarioElapsedSeconds = Math.max(0, tick - scenarioStartedAtTick);
-  const acknowledgedKey = [...acknowledgedIds].sort().join("|");
-  const snapshot = useMemo(
-    () =>
-      buildSimulationSnapshot({
-        siteId,
-        now,
-        scenario,
-        scenarioElapsedSeconds,
-        timeScale,
-        responseIds: demandResponseIds,
-        acknowledgedIds,
-      }),
-    [acknowledgedKey, demandResponseIds, now, scenario, scenarioElapsedSeconds, siteId, timeScale],
-  );
+  const snapshot = useMemo(() => {
+    const raw = buildSimulationSnapshot({
+      siteId,
+      now,
+      scenario,
+      scenarioElapsedSeconds,
+      timeScale,
+      responseIds: demandResponseIds,
+      acknowledgedIds,
+    });
+    return calibrateSimulationSnapshot({
+      snapshot: raw,
+      site: demoSites[siteId],
+      siteId,
+      scenario,
+      scenarioState: raw.scenarioState,
+      responseIds: demandResponseIds,
+      acknowledgedIds,
+      now,
+    });
+  }, [acknowledgedIds, demandResponseIds, now, scenario, scenarioElapsedSeconds, siteId, timeScale]);
 
   const value = useMemo<SimulationContextValue>(
     () => ({
